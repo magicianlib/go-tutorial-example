@@ -2,6 +2,7 @@ package zip
 
 import (
 	"archive/zip"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -9,7 +10,16 @@ import (
 	"strings"
 )
 
+// UnpackZip unpack zip archive from src to dst
+//
 func UnpackZip(dst, src string) error {
+
+	if dst == "" {
+		return errors.New("zip: archive unpack path is empty")
+	}
+	if src == "" {
+		return errors.New("zip: not found archive file")
+	}
 
 	r, err := zip.OpenReader(src)
 	if err != nil {
@@ -47,7 +57,13 @@ func UnpackZip(dst, src string) error {
 	return nil
 }
 
+// ShowArchiveFiles only show archive file
+//
 func ShowArchiveFiles(src string) error {
+
+	if src == "" {
+		return errors.New("zip: not found archive file")
+	}
 
 	r, err := zip.OpenReader(src)
 	if err != nil {

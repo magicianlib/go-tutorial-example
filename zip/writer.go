@@ -16,11 +16,11 @@ import (
 func CreateZipArchive(dst string, src ...string) error {
 
 	if len(src) == 0 {
-		return errors.New("zip: src is empty")
+		return errors.New("zip: not found need archive file")
 	}
 
 	if dst == "" {
-		return errors.New("zip: dst is empty")
+		return errors.New("zip: archive pack path is empty")
 	}
 
 	// remove dst if exist
