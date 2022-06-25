@@ -74,8 +74,12 @@ func ShowArchiveFiles(src string) error {
 	_, archive := filepath.Split(src)
 
 	fmt.Printf("Archive: %s\n", archive)
-	fmt.Printf("%10s | %-19s | %-20s\n", "Length", "Modified", "Name")
-	fmt.Println("---------- + ------------------- + --------------------")
+	fmt.Printf("%10s   %-19s   %-20s\n", "Length", "Modified", "Name")
+	fmt.Printf("%s + %s + %s\n",
+		strings.Repeat("-", 10),
+		strings.Repeat("-", 19),
+		strings.Repeat("-", 20),
+	)
 
 	var num int8
 	var size uint64
@@ -85,11 +89,18 @@ func ShowArchiveFiles(src string) error {
 		size += f.CompressedSize64
 
 		fmt.Printf("%10d | %-19s | %-20s\n",
-			f.CompressedSize64, f.Modified.Format("2006-01-02 15:04:05"), f.Name)
+			f.CompressedSize64,
+			f.Modified.Format("2006-01-02 15:04:05"),
+			f.Name,
+		)
 	}
 
-	fmt.Println("------------                     ----------------------")
-	fmt.Printf("%10d                         %d files\n", size, num)
+	fmt.Printf("%s+%s+%s\n",
+		strings.Repeat("-", 11),
+		strings.Repeat("-", 21),
+		strings.Repeat("-", 21),
+	)
+	fmt.Printf("%10d%s%d files\n", size, strings.Repeat(" ", 25), num)
 
 	return nil
 }
