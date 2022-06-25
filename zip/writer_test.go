@@ -7,26 +7,30 @@ import (
 	"testing"
 )
 
-func TestCreateZip(t *testing.T) {
+func TestCreateZipArchive(t *testing.T) {
 
 	tDir, err := os.MkdirTemp("", "testdata*")
 	if err != nil {
 		t.Error(err)
 	}
 
-	zipPath := path.Join(tDir, "testdata.zip")
+	dst := path.Join(tDir, "testdata.zip")
 
-	t.Logf("writer zip: %s\n", zipPath)
+	t.Log("archive dst:", dst)
 
 	dir, _ := filepath.Abs(".")
 	testdata := path.Join(dir, "testdata")
 
-	var files = []string{
+	var src = []string{
 		path.Join(testdata, "order-1.csv"),
 		path.Join(testdata, "dir"),
 	}
 
-	err = CreateZip(zipPath, files...)
+	for _, f := range src {
+		t.Log("archive src:", f)
+	}
+
+	err = CreateZipArchive(dst, src...)
 	if err != nil {
 		t.Error(err)
 	}

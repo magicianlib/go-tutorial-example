@@ -9,43 +9,47 @@ import (
 	"path/filepath"
 )
 
-// CreateZip create a zip file
+// CreateZipArchive create a zip file
 //
-// compress the file specified by src into a zip(dest) file
+// compress the file specified by src into a zip(dst) file
 //
-func CreateZip(dest string, src ...string) error {
+func CreateZipArchive(dst string, src ...string) error {
 
 	if len(src) == 0 {
-		return errors.New("zip: filepath(src) is empty")
+		return errors.New("zip: src is empty")
 	}
 
-	// remove dest zip file if exist
-	_ = os.Remove(dest)
+	if dst == "" {
+		return errors.New("zip: dst is empty")
+	}
 
-	// create a new zip file
-	f, err := os.Create(dest)
+	// remove dst if exist
+	_ = os.Remove(dst)
+
+	// create zip archive
+	archive, err := os.Create(dst)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer archive.Close()
 
-	// create a new zip writer
-	w := zip.NewWriter(f)
-	defer f.Close()
+	// zip archive writer
+	w := zip.NewWriter(archive)
+	defer w.Close()
 
-	for _, filename := range src {
+	for _, f := range src {
 
-		stat, err := os.Stat(filename)
+		stat, err := os.Stat(f)
 		if err != nil {
 			return err
 		}
 
 		if stat.IsDir() {
-			if err := walkDir(w, filename); err != nil {
+			if err := addArchiveDir(w, f); err != nil {
 				return err
 			}
 		} else {
-			if err := packFile(w, "", filename, &stat); err != nil {
+			if err := addArchiveFile(w, "", f, &stat); err != nil {
 				return err
 			}
 		}
@@ -54,7 +58,7 @@ func CreateZip(dest string, src ...string) error {
 	return nil
 }
 
-func walkDir(w *zip.Writer, dir string) error {
+func addArchiveDir(w *zip.Writer, dir string) error {
 
 	err := filepath.Walk(dir, func(path string, fi fs.FileInfo, err error) error {
 
@@ -62,13 +66,13 @@ func walkDir(w *zip.Writer, dir string) error {
 		//	return nil
 		//}
 
-		return packFile(w, dir, path, &fi)
+		return addArchiveFile(w, dir, path, &fi)
 	})
 
 	return err
 }
 
-func packFile(w *zip.Writer, absDir string, absPath string, fi *fs.FileInfo) error {
+func addArchiveFile(w *zip.Writer, dir string, path string, fi *fs.FileInfo) error {
 
 	header, err := zip.FileInfoHeader(*fi)
 	if err != nil {
@@ -77,18 +81,18 @@ func packFile(w *zip.Writer, absDir string, absPath string, fi *fs.FileInfo) err
 
 	// determine filename
 	var filename string
-	if absDir == "" {
-		_, filename = filepath.Split(absPath)
+	if dir == "" {
+		_, filename = filepath.Split(path)
 	} else {
-		absDir = filepath.Dir(absDir)
-		filename, err = filepath.Rel(absDir, absPath)
+		dir = filepath.Dir(dir)
+		filename, err = filepath.Rel(dir, path)
 		if err != nil {
 			return err
 		}
 	}
 
 	// Store OR Deflate
-	header.Method = zip.Deflate
+	header.Method = zip.Store
 	header.Name = filename
 
 	if (*fi).IsDir() {
@@ -104,7 +108,7 @@ func packFile(w *zip.Writer, absDir string, absPath string, fi *fs.FileInfo) err
 		return nil
 	}
 
-	f, err := os.Open(absPath)
+	f, err := os.Open(path)
 	if err != nil {
 		return err
 	}
