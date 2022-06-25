@@ -9,11 +9,11 @@ import (
 	"path/filepath"
 )
 
-// CreateZipArchive create a zip file
+// CreateArchive create a zip file
 //
 // compress the file specified by src into a zip(dst) file
 //
-func CreateZipArchive(dst string, src ...string) error {
+func CreateArchive(dst string, src ...string) error {
 
 	if len(src) == 0 {
 		return errors.New("zip: not found need archive file")
@@ -33,9 +33,14 @@ func CreateZipArchive(dst string, src ...string) error {
 	}
 	defer archive.Close()
 
+	return CreateArchiveW(archive, src...)
+}
+
+func CreateArchiveW(w io.Writer, src ...string) error {
+
 	// zip archive writer
-	w := zip.NewWriter(archive)
-	defer w.Close()
+	zw := zip.NewWriter(w)
+	defer zw.Close()
 
 	for _, f := range src {
 
@@ -45,11 +50,11 @@ func CreateZipArchive(dst string, src ...string) error {
 		}
 
 		if stat.IsDir() {
-			if err := addArchiveDir(w, f); err != nil {
+			if err := addArchiveDir(zw, f); err != nil {
 				return err
 			}
 		} else {
-			if err := addArchiveFile(w, "", f, &stat); err != nil {
+			if err := addArchiveFile(zw, "", f, &stat); err != nil {
 				return err
 			}
 		}
@@ -116,6 +121,27 @@ func addArchiveFile(w *zip.Writer, dir string, path string, fi *fs.FileInfo) err
 	_, err = io.Copy(hw, f)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func CreateArchiveF(w io.Writer, files []File) error {
+
+	zw := zip.NewWriter(w)
+	defer zw.Close()
+
+	for _, file := range files {
+
+		f, err := zw.Create(file.Name)
+		if err != nil {
+			return err
+		}
+
+		_, err = f.Write([]byte(file.Body))
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
