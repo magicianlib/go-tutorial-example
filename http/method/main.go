@@ -19,6 +19,7 @@ type UserInfo struct {
 func UserHandlerFunc(w http.ResponseWriter, r *http.Request) {
 
 	// Handle different request method
+
 	switch r.Method {
 	case http.MethodGet:
 		HandlerGet(w, r)
@@ -41,6 +42,7 @@ func HandlerGet(w http.ResponseWriter, r *http.Request) {
 
 	b, _ := json.Marshal(&m)
 
+	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
 }
@@ -70,6 +72,7 @@ func HandlerPost(w http.ResponseWriter, r *http.Request) {
 
 		b, _ := json.Marshal(&m)
 
+		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write(b)
 
@@ -78,13 +81,9 @@ func HandlerPost(w http.ResponseWriter, r *http.Request) {
 		// limit your max input length!
 		r.ParseMultipartForm(32 << 20)
 
-		// post file upload
+		name := r.FormValue("name")
 
-		// Call ParseForm() to parse the file form.
-		//if err := r.ParseForm(); err != nil {
-		//	fmt.Fprintf(w, "ParseForm() form err: %s\n", err)
-		//}
-
+		// upload file
 		f, fh, err := r.FormFile("file")
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -98,12 +97,14 @@ func HandlerPost(w http.ResponseWriter, r *http.Request) {
 
 		// handler file
 		m := make(map[string]interface{})
+		m["name"] = name
 		m["filename"] = fh.Filename
 		m["size"] = fh.Size
 		m["content"] = buf.String()
 
 		b, _ := json.Marshal(&m)
 
+		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write(b)
 
@@ -120,6 +121,7 @@ func HandlerPost(w http.ResponseWriter, r *http.Request) {
 		u := UserInfo{}
 		_ = json.Unmarshal(b, &u)
 
+		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write(b)
 
