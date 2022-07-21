@@ -8,3 +8,5 @@ require (
 	github.com/gomodule/redigo v1.8.9
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d
 )
+
+require github.com/go-sql-driver/mysql v1.6.0 // indirect
