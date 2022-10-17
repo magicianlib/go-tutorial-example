@@ -1,7 +1,7 @@
 package main
 
 //
-// Shutdown http server graceful(Implement the http server using the gin)
+// Shutdown methodroute server graceful(Implement the methodroute server using the gin)
 //
 //
 
@@ -24,7 +24,7 @@ const (
 )
 
 var (
-	port            = flag.Int("port", 8080, "http port to listen on")
+	port            = flag.Int("port", 8080, "methodroute port to listen on")
 	shutdownTimeout = flag.Duration("shutdown-timeout", 10*time.Second, "shutdown timeout (5s,5m,5h) before connections are cancelled")
 )
 
@@ -58,7 +58,7 @@ func main() {
 		Handler: router,
 	}
 
-	// Run go http srv in background
+	// Run go methodroute srv in background
 	go func() {
 		log.Printf("%s listening on 0.0.0.0:%d with %v timeout", service, *port, *shutdownTimeout)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
