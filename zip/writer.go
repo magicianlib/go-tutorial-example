@@ -7,12 +7,12 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // CreateArchive create a zip file
 //
 // compress the file specified by src into a zip(dst) file
-//
 func CreateArchive(dst string, src ...string) error {
 
 	if len(src) == 0 {
@@ -44,6 +44,9 @@ func CreateArchiveW(w io.Writer, src ...string) error {
 
 	for _, f := range src {
 
+		// Delete the Spaces on both ends
+		f = strings.TrimSpace(f)
+
 		stat, err := os.Stat(f)
 		if err != nil {
 			return err
@@ -67,9 +70,9 @@ func addArchiveDir(w *zip.Writer, dir string) error {
 
 	err := filepath.Walk(dir, func(path string, fi fs.FileInfo, err error) error {
 
-		//if strings.Compare(dir, path) == 0 {
-		//	return nil
-		//}
+		// if strings.Compare(dir, path) == 0 {
+		// 	return nil
+		// }
 
 		return addArchiveFile(w, dir, path, &fi)
 	})
